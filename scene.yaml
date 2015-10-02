@@ -113,13 +113,13 @@ layers:
             flatlines:
                 order: 7
                 color: [0.65882, 0.65882, 0.50196]
-                width: 5
+                width: 10
         highway:
             filter: { kind: highway }
             draw:
                 flatlines:
                     color: [1.000, 0.863, 0.133]
-                    width: 15
+                    width: 17
                     outline:
                         width: 1
                         color: [0.671, 0.784, 0.949]
@@ -132,13 +132,13 @@ layers:
                     filter: { is_link: yes } # on- and off-ramps, etc
                     draw:
                         lineshadow:
-                            width: 5
+                            width: 10
                             color: [0.671, 0.784, 0.949]
             link:
                 filter: { is_link: yes } # on- and off-ramps, etc
                 draw:
                     flatlines:
-                        width: 5
+                        width: 10
         path:
             filter: { kind: path }
             draw:
@@ -166,7 +166,7 @@ layers:
         shadows:
             draw:
                 shadow:
-                    order: 75
+                    order: 80
                     extrude: function () { return feature.height || feature.area / 100 % 1 + 10; }
     pois:
         data: { source: osm }
