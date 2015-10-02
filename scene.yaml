@@ -4,8 +4,10 @@ sources:
         url:  //vector.mapzen.com/osm/all/{z}/{x}/{y}.topojson?api_key=vector-tiles-HqUVidw
         
 camera:
-    type: isometric
-    axis: [-0.25, 1.]
+    type: perspective
+    vanishing_point: [0, -1000]
+    # type: isometric
+    # axis: [-0.25, 1.]
 
 lights:
     light1:
@@ -21,8 +23,7 @@ styles:
     flatpolys:
         base: polygons
         lighting: false # ignore lights
-    # fake shadows by drawing another copy of the buildings underneath
-    shadow:
+    shadow: # fake shadows by drawing another copy of the buildings underneath
         base: polygons
         lighting: false
         blend: multiply
@@ -35,8 +36,8 @@ styles:
                     // make a checkerboard
                     if ((fract(st.x) > .5 && fract(st.y) > .5) || (fract(st.x) < .5 && fract(st.y) < .5)) color.rgb = vec3(0., 0.0, 1.0);
                     else color = vec4(1.);
-                # warp up and over
-                position: position.xy += vec2(5., 3.) * position.z;
+
+                position: position.xy += vec2(5., 3.) * position.z; // warp up and over
     lineshadow:
         base: lines
         mix: shadow
@@ -64,25 +65,37 @@ styles:
         base: points
         animated: true
         texcoords: true
+        texture: palm
+        # blend: overlay
         shaders:
-            uniforms:
-                url: palm_sprites.gif
-                # url: palm01.gif
             blocks:
                 color: |
                     float number_of_frames = 4.;
                     float frames_per_second = 2.;
-                    // make palms sway in the breeze
-                    float time = u_time + gl_FragCoord.x / 10.;
+                    // animate palms -- offset a bit by screen position
+                    float time = u_time + gl_FragCoord.x / 100.;
                     float offset = floor(mod(time * frames_per_second, number_of_frames))/number_of_frames;
-                    color.rgb = texture2D(u_texture, (vec2(v_texcoord.x/number_of_frames, v_texcoord.y) + vec2(offset, 0.))).rgb;
-                    if (color.r > .6) discard;
+                    color = texture2D(u_texture, (vec2(v_texcoord.x/number_of_frames, v_texcoord.y) + vec2(offset, 0.)));
+    palmshadows:
+        base: points
+        mix: shadow
+        lighting: false # ignore lights
+        texture: singlepalm
+        blend: multiply
+        shaders:
+            blocks:
+                # set alpha to texture alpha
+                color: color.a = texture2D(u_texture, (vec2(v_texcoord.x, v_texcoord.y))).a;
+                # bend tree shadow over
+                position: position.x += v_texcoord.y * 50.;
 
 textures:
     palm:
-        # url: palm_sprites.png
-        url: half.gif
-        mapping: planar
+        url: palm_sprites.png
+        filtering: nearest
+    singlepalm:
+        url: single-palm.png
+        filtering: nearest
 
 layers:
     earth:
@@ -170,7 +183,16 @@ layers:
                     extrude: function () { return feature.height || feature.area / 100 % 1 + 10; }
     pois:
         data: { source: osm }
+        filter:
+            not:
+                kind: [tree, helipad]
         draw:
             palms:
-                size: 64px
+                size: 32px
                 texture: palm
+        shadow:
+            draw:
+                palmshadows:
+                    order: 50
+                    size: 32px
+                    texture: palm
