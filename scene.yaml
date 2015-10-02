@@ -66,18 +66,23 @@ styles:
         texcoords: true
         shaders:
             uniforms:
-                u_texture: palm_sprites.png
+                url: palm_sprites.gif
+                # url: palm01.gif
             blocks:
                 color: |
                     float number_of_frames = 4.;
                     float frames_per_second = 2.;
-                    float offset = floor(mod(u_time * frames_per_second, number_of_frames))/number_of_frames;
-                    color.rgb = texture2D(u_texture, (vec2(v_texcoord.x/number_of_frames, v_texcoord.y*2.-.5) + vec2(offset, 0.))).rgb;
-                    // if (color.rgb == vec3(0.)) discard;
+                    // make palms sway in the breeze
+                    float time = u_time + gl_FragCoord.x / 10.;
+                    float offset = floor(mod(time * frames_per_second, number_of_frames))/number_of_frames;
+                    color.rgb = texture2D(u_texture, (vec2(v_texcoord.x/number_of_frames, v_texcoord.y) + vec2(offset, 0.))).rgb;
+                    if (color.r > .6) discard;
 
 textures:
     palm:
-        url: palm_sprites.png
+        # url: palm_sprites.png
+        url: half.gif
+        mapping: planar
 
 layers:
     earth:
