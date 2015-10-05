@@ -1,0 +1,144 @@
+sources:
+    osm:
+        type: TopoJSON
+        url:  //vector.mapzen.com/osm/all/{z}/{x}/{y}.topojson?api_key=vector-tiles-HqUVidw
+        
+camera:
+    type: perspective
+    vanishing_point: [0, -1000]
+    # type: isometric
+    # axis: [-0.25, 1.]
+
+lights:
+    light1:
+        type: ambient
+        direction: [1, 1, -.9]
+        diffuse: .0
+        ambient: 1.
+
+styles:
+    flatlines:
+        base: lines
+        lighting: false # ignore lights
+    flatpolys:
+        base: polygons
+        lighting: false # ignore lights
+
+    buildings:
+        base: polygons
+        animated: true
+        shaders:
+            defines:
+                GRAIN_AMOUNT: .3
+                NUM_OCTAVES: 1
+            uniforms:
+                u_frequency: 8.
+            blocks:
+                global: |
+                    // 3d noise
+                    float rand(vec2 co){
+                        return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+                    }
+
+                color: |
+                    // // large area buildings
+                    // if (color.r > .5) {
+                    //     color.rgb = vec3(1., 0., 0.);
+                    // } else if (color.r > .4) {
+                    //     color.rgb = vec3(1., .5, 0.);
+                    // // tall buildings
+                    // } else if (color.g > .5) {
+                    //     color.rgb = vec3(0., .7, 0.);
+                    // } else if (color.g > .4) {
+                    //     color.rgb = vec3(0., 1., .4);
+                    // } else if (color.b > .24) {
+                    //     color.rgb = vec3(0., 0., 1.);
+                    // } else {
+                    //     color.rgb = vec3(.6, 0., 1.);
+                    // }
+                    // color.rgb = vec3(r*1.0);
+                    float pixelSize = 2.0;
+                    float fps = 5.;
+                    float noiseColor1 = rand(floor(gl_FragCoord.xy * .5/pixelSize)*floor((u_time+1.)*fps)) * 1.1;
+                    float noiseColor2 = rand(floor(gl_FragCoord.xy * .5/pixelSize)*floor((u_time+1.2)*fps)) * 1.1;
+                    float noiseColor3 = rand(floor(gl_FragCoord.xy * .5/pixelSize)*floor((u_time+1.4)*fps)) * 1.1;
+                    vec3 noiseColor = floor(noiseColor1) * vec3(.7) + floor(noiseColor2)*vec3(1.) + floor(noiseColor3) * vec3(.7);
+                    // float noiseColor = noise(sin(gl_FragCoord.xyz * 1.));
+                    color.rgb += noiseColor * .15;
+                    // color.rgb = noiseColor * 1.0;
+    
+layers:
+    earth:
+        data: { source: osm, layer: earth }
+        draw:
+            flatpolys:
+                order: 0
+                color: [0.882, 0.886, 0.788]
+
+    landuse:
+        data: { source: osm, layer: landuse }
+        parks:
+            draw:
+                flatpolys:
+                    order: 1
+                    color: [0.5, 0.825, 0.5]
+    water:
+        data: { source: osm, layer: water }
+        draw:
+            flatpolys:
+                order: 3
+                color: [0.671, 0.784, 0.949]
+
+    roads:
+        data: { source: osm, layer: roads }
+        filter: { not: {kind: [rail] } }
+        draw:
+            flatlines:
+                order: 7
+                color: [0.65882, 0.65882, 0.50196]
+                width: 10
+        highway:
+            filter: { kind: highway }
+            draw:
+                flatlines:
+                    color: [1.000, 0.863, 0.133]
+                    width: 17
+                    outline:
+                        width: 1
+                        color: [0.671, 0.784, 0.949]
+            link:
+                filter: { is_link: yes } # on- and off-ramps, etc
+                draw:
+                    flatlines:
+                        width: 10
+        path:
+            filter: { kind: path }
+            draw:
+                flatlines:
+                    width: 2
+        z-order:
+            draw:
+                flatlines:
+                    # let roads sort themselves
+                    order: function() { return 6 + feature.sort_key * 2.; }
+
+
+    # buildings are the only layer that gets lighting
+    buildings:
+        data: { source: osm }
+        draw:
+            buildings:
+                order: 80
+                color: |
+                    function () {
+                        var a = feature.area;
+                        var h = feature.height;
+                        var v = Math.floor(Math.random(1)*2)*.25;
+                        var r = feature.area > 10000 ? .5 : 0.;
+                        var g = feature.height > 150 ? .5 : 0.;
+                        var b = feature.height > 150 ? .5 : 0.;                        
+                        return [v+r, v+g, v];
+                        // return [v, v, v];
+                    }
+                extrude: function () { return feature.height || feature.area / 100 % 1 * 20 + 20; }
+        
