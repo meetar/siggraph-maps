@@ -1,0 +1,136 @@
+sources:
+    osm:
+        type: TopoJSON
+        url:  //vector.mapzen.com/osm/all/{z}/{x}/{y}.topojson?api_key=vector-tiles-HqUVidw
+        
+camera:
+    type: isometric
+    axis: [0.03, 1.6]
+
+lights:
+    light1:
+        type: directional
+        direction: [1, 1, -.85]
+        diffuse: .5
+        ambient: .6
+
+styles:
+    flatlines:
+        base: lines
+        lighting: false # ignore lights
+    flatpolys:
+        base: polygons
+        lighting: false # ignore lights
+    windows:
+        base: polygons
+        shaders:
+            uniforms:
+                u_frequency: 10.
+            blocks:
+                color: |
+                    vec3 vPos = v_world_position.xyz / u_frequency;
+                    vec3 mask = mix(vec3(0.0), vec3(1.0), smoothstep(fract(mod(vPos, 1.)), fract(mod(vPos, .9)), vec3(.9)));
+                    float maskval = mask.x + mask.y + mask.z;
+                    // windows
+                    if (maskval < .5 && v_normal.z < .6) {
+                        color.rgb = vec3(0.941, 0.925, 0.769);
+                    }
+
+    triangles:
+        base: polygons
+        shaders:
+            uniforms:
+                u_frequency: 300.
+                u_color: [1., .4, 1.]
+            blocks:
+                color: |
+                    if (u_map_position.z > 14.) {
+                        vec2 vPos = v_world_position.xy / u_frequency;
+                        vec2 mask = mix(vec2(0.0), vec2(1.0), fract(mod(vPos, .29)));
+                        float maskval = mask.x + mask.y;
+                        if (maskval > .5) {
+                            color.rgb = u_color;
+                        }
+                    }
+    landtriangles:
+        base: polygons
+        mix: triangles
+        shaders:
+            uniforms:
+                u_color: [.4, 1., 1.]
+
+layers:
+    earth:
+        data: { source: osm, layer: earth }
+        draw:
+            triangles:
+                order: 0
+                color: [0.761, 0.886, 0.871]
+
+    landuse:
+        data: { source: osm, layer: landuse }
+        parks:
+            draw:
+                landtriangles:
+                    order: 1
+                    color: [0.184, 0.455, 0.443]
+        parking:
+            filter: { kind: parking }
+            draw:
+                polygons:
+                    order: 2
+                    color: [0.220, 0.212, 0.216]
+    water:
+        data: { source: osm, layer: water }
+        draw:
+            flatpolys:
+                order: 3
+                color: [0.671, 0.784, 0.949]
+
+    roads:
+        data: { source: osm, layer: roads }
+        filter: { not: {kind: [rail] } }
+        draw:
+            flatlines:
+                order: 7
+                color: [0.337, 0.400, 0.373]
+                width: 10
+        highway:
+            filter: { kind: highway }
+            draw:
+                flatlines:
+                    color: [0.408, 0.396, 1.000]
+                    width: 20
+                    outline:
+                        width: 3
+                        color: [0.761, 0.886, 0.871]
+            link:
+                filter: { is_link: yes } # on- and off-ramps, etc
+                draw:
+                    flatlines:
+                        width: 10
+        major:
+            filter: { kind: major_road }
+            draw:
+                flatlines:
+                    color: [0.408, 0.396, 1.000]
+
+        path:
+            filter: { kind: path }
+            draw:
+                flatlines:
+                    width: 2
+        z-order:
+            draw:
+                flatlines:
+                    # let roads sort themselves
+                    order: function() { return 6 + feature.sort_key * 2.; }
+
+    buildings:
+        data: { source: osm }
+        draw:
+            windows:
+                order: 80
+                color: [.4, .0, .4]
+                # randomize the heights of buildings a bit
+                extrude: function () { return feature.height || feature.area / 100 % 1 * 20 + 20; }
