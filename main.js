@@ -66,6 +66,17 @@ map = (function () {
         layer.addTo(map);
     });
 
+    // map.once('focus', function() { map.scrollWheelZoom.enable(); });
+
+    // toggle zooming with onclick
+    map.on('click', function() {
+        if (map.scrollWheelZoom.enabled()) {
+            map.scrollWheelZoom.disable();
+        } else {
+            map.scrollWheelZoom.enable();
+        }
+    });
+
     return map;
 
 }());
