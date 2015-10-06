@@ -189,10 +189,8 @@ layers:
         draw:
             palms:
                 size: 32px
-                texture: palm
         shadow:
             draw:
                 palmshadows:
                     order: 50
                     size: 32px
-                    texture: palm
