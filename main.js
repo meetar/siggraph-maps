@@ -5,12 +5,13 @@ map = (function () {
     'use strict';
 
     var locations = {
+        'Los Angeles': [34.0520, -118.2440, 16],
         'Oakland': [37.8044, -122.2708, 15],
         'New York': [40.70531887544228, -74.00976419448853, 15],
         'Seattle': [47.5937, -122.3215, 15]
     };
 
-    var map_start_location = locations['New York'];
+    var map_start_location = locations['Los Angeles'];
 
     /*** URL parsing ***/
 
