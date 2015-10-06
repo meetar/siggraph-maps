@@ -6,15 +6,13 @@ sources:
 camera:
     type: perspective
     vanishing_point: [0, -1000]
-    # type: isometric
-    # axis: [-0.25, 1.]
 
 lights:
     light1:
         type: ambient
         direction: [1, 1, -.9]
         diffuse: .0
-        ambient: 1.
+        ambient: 2.
 
 styles:
     flatlines:
@@ -24,8 +22,27 @@ styles:
         base: polygons
         lighting: false # ignore lights
 
+    galaxy:
+        base: polygons
+        material:
+            ambient:
+                texture: galaxy.jpg
+                mapping: spheremap
+    stars:
+        base: polygons
+        material:
+            ambient:
+                texture: stars.jpg
+                mapping: spheremap
+                # scale: .0001
+
+    # import noise function from external file
+    noise:
+        url: noise.yaml
+
     buildings:
         base: polygons
+        mix: [galaxy, noise]
         animated: true
         shaders:
             defines:
@@ -34,93 +51,69 @@ styles:
             uniforms:
                 u_frequency: 8.
             blocks:
-                global: |
-                    // 3d noise
-                    float rand(vec2 co){
-                        return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
-                    }
-
                 color: |
-                    // // large area buildings
-                    // if (color.r > .5) {
-                    //     color.rgb = vec3(1., 0., 0.);
-                    // } else if (color.r > .4) {
-                    //     color.rgb = vec3(1., .5, 0.);
-                    // // tall buildings
-                    // } else if (color.g > .5) {
-                    //     color.rgb = vec3(0., .7, 0.);
-                    // } else if (color.g > .4) {
-                    //     color.rgb = vec3(0., 1., .4);
-                    // } else if (color.b > .24) {
-                    //     color.rgb = vec3(0., 0., 1.);
-                    // } else {
-                    //     color.rgb = vec3(.6, 0., 1.);
-                    // }
-                    // color.rgb = vec3(r*1.0);
-                    float pixelSize = 2.0;
-                    float fps = 5.;
-                    float noiseColor1 = rand(floor(gl_FragCoord.xy * .5/pixelSize)*floor((u_time+1.)*fps)) * 1.1;
-                    float noiseColor2 = rand(floor(gl_FragCoord.xy * .5/pixelSize)*floor((u_time+1.2)*fps)) * 1.1;
-                    float noiseColor3 = rand(floor(gl_FragCoord.xy * .5/pixelSize)*floor((u_time+1.4)*fps)) * 1.1;
-                    vec3 noiseColor = floor(noiseColor1) * vec3(.7) + floor(noiseColor2)*vec3(1.) + floor(noiseColor3) * vec3(.7);
-                    // float noiseColor = noise(sin(gl_FragCoord.xyz * 1.));
-                    color.rgb += noiseColor * .15;
-                    // color.rgb = noiseColor * 1.0;
+                    float pixelSize = 4.;
+                    float fps = .05;
+                    float t = u_time * fps;
+                    float t2 = u_time * fps +.66;
+                    vec3 pos = floor(v_world_position.xyz/pixelSize);
+                    vec3 sparkles = vec3(0.);
+                    sparkles = vec3(cnoise(pos+t))*2.;
+                    sparkles += vec3(cnoise(pos+t2))*2.;
+                    // clamp
+                    float minInput = .95;
+                    float maxInput = 1.;
+                    sparkles = min(max(sparkles - vec3(minInput), vec3(0.0)) / (vec3(maxInput) - vec3(minInput)), vec3(1.0));
+                    // brighten 
+                    sparkles += .5;
+                    color.rgb *= sparkles;
+                    
+    roads:
+        base: lines
+        texcoords: true
+        blend: add
+        shaders:
+            blocks:
+                color: |
+                    vec2 st = v_texcoord.xy;
+                    color.rgb *= vec3(sin(st.x*4.-.5)*.5, .5, .5);
     
 layers:
     earth:
         data: { source: osm, layer: earth }
         draw:
-            flatpolys:
+            stars:
                 order: 0
-                color: [0.882, 0.886, 0.788]
+                color: [.1, .1, .1]
 
     landuse:
         data: { source: osm, layer: landuse }
         parks:
             draw:
-                flatpolys:
+                stars:
                     order: 1
-                    color: [0.5, 0.825, 0.5]
+                    color: white
     water:
         data: { source: osm, layer: water }
         draw:
-            flatpolys:
+            stars:
                 order: 3
                 color: [0.671, 0.784, 0.949]
 
     roads:
         data: { source: osm, layer: roads }
-        filter: { not: {kind: [rail] } }
         draw:
-            flatlines:
+            roads:
                 order: 7
-                color: [0.65882, 0.65882, 0.50196]
-                width: 10
+                color: [1.000, 0.318, 0.737]
+                width: [[14, 80], [16, 30]]
+                cap: round
         highway:
             filter: { kind: highway }
             draw:
-                flatlines:
-                    color: [1.000, 0.863, 0.133]
-                    width: 17
-                    outline:
-                        width: 1
-                        color: [0.671, 0.784, 0.949]
-            link:
-                filter: { is_link: yes } # on- and off-ramps, etc
-                draw:
-                    flatlines:
-                        width: 10
-        path:
-            filter: { kind: path }
-            draw:
-                flatlines:
-                    width: 2
-        z-order:
-            draw:
-                flatlines:
-                    # let roads sort themselves
-                    order: function() { return 6 + feature.sort_key * 2.; }
+                roads:
+                    color: [1.000, 0.925, 0.000]
+                    width: [[12, 500], [16, 100]]
 
 
     # buildings are the only layer that gets lighting
@@ -129,16 +122,16 @@ layers:
         draw:
             buildings:
                 order: 80
-                color: |
-                    function () {
-                        var a = feature.area;
-                        var h = feature.height;
-                        var v = Math.floor(Math.random(1)*2)*.25;
-                        var r = feature.area > 10000 ? .5 : 0.;
-                        var g = feature.height > 150 ? .5 : 0.;
-                        var b = feature.height > 150 ? .5 : 0.;                        
-                        return [v+r, v+g, v];
-                        // return [v, v, v];
-                    }
+                # color: |
+                #     function () {
+                #         var a = feature.area;
+                #         var h = feature.height;
+                #         var v = Math.floor(Math.random(1)*2)*.25;
+                #         var r = feature.area > 10000 ? .5 : 0.;
+                #         var g = feature.height > 150 ? .5 : 0.;
+                #         var b = feature.height > 150 ? .5 : 0.;                        
+                #         return [v+r, v+g, v];
+                #         // return [v, v, v];
+                #     }
                 extrude: function () { return feature.height || feature.area / 100 % 1 * 20 + 20; }
         
