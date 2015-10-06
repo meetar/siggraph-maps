@@ -85,7 +85,7 @@ styles:
         shaders:
             blocks:
                 # set alpha to texture alpha
-                color: color.a = texture2D(u_texture, (vec2(v_texcoord.x, v_texcoord.y))).a;
+                color: color.a = texture2D(u_texture, v_texcoord).a;
                 # bend tree shadow over
                 position: position.x += v_texcoord.y * 50.;
 
