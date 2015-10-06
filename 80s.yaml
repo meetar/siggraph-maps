@@ -89,7 +89,7 @@ layers:
 
     roads:
         data: { source: osm, layer: roads }
-        filter: { not: {kind: [rail] } }
+        filter: { not: {kind: [rail, path] } }
         draw:
             flatlines:
                 order: 7
@@ -114,12 +114,9 @@ layers:
             draw:
                 flatlines:
                     color: [0.408, 0.396, 1.000]
-
-        path:
-            filter: { kind: path }
-            draw:
-                flatlines:
-                    width: 2
+                    outline:
+                        width: 1
+                        color: [0.761, 0.886, 0.871]
         z-order:
             draw:
                 flatlines:
