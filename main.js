@@ -26,9 +26,10 @@ map = (function () {
 
     /*** Map ***/
 
-    var map = L.map('map',
-        {"keyboardZoomOffset" : .05}
-    );
+    var map = L.map('map', {
+        "keyboardZoomOffset" : .05,
+        scrollWheelZoom: false
+    });
 
     var style_file = 'palms.yaml';
     var url_search = window.location.search.slice(1);
