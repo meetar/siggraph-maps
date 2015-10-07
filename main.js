@@ -68,15 +68,18 @@ map = (function () {
     });
 
     // map.once('focus', function() { map.scrollWheelZoom.enable(); });
-
+    var domain = window.location.hostname;
+    console.log("domain:",domain);
     // toggle zooming with onclick
-    map.on('click', function() {
-        if (map.scrollWheelZoom.enabled()) {
-            map.scrollWheelZoom.disable();
-        } else {
-            map.scrollWheelZoom.enable();
-        }
-    });
+    if (domain == "mapzen.com") {
+        map.on('click', function() {
+            if (map.scrollWheelZoom.enabled()) {
+                map.scrollWheelZoom.disable();
+            } else {
+                map.scrollWheelZoom.enable();
+            }
+        });
+    } else map.scrollWheelZoom.enable();
 
     return map;
 
