@@ -68,7 +68,9 @@ map = (function () {
     });
 
     // map.once('focus', function() { map.scrollWheelZoom.enable(); });
-    var domain = window.location.hostname;
+    var domain = (window.location != window.parent.location)
+            ? document.referrer
+            : document.location;
     console.log("domain:",domain);
     // toggle zooming with onclick
     if (domain == "mapzen.com") {
