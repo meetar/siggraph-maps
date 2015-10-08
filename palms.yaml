@@ -32,7 +32,7 @@ styles:
                 color: |
                     // Sample based on screenspace
                     // make a 2x2 pixel space
-                    vec2 st = gl_FragCoord.xy / u_device_pixel_ratio;
+                    vec2 st = gl_FragCoord.xy / 4. * floor(u_device_pixel_ratio);
                     // make a checkerboard
                     if ((fract(st.x) > .5 && fract(st.y) > .5) || (fract(st.x) < .5 && fract(st.y) < .5)) color.rgb = vec3(0., 0.0, 1.0);
                     else color = vec4(1.);
