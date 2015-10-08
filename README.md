@@ -1,6 +1,6 @@
 # siggraph-maps
 
-Three maps to illustrate a blog post, interpreting a very short week in downtown Los Angeles.
+Three maps to [illustrate a Mapzen blog post](https://mapzen.com/blog/scenes-from-a-siggraph), interpreting a very short week in downtown Los Angeles.
 
 #### Palms
 http://meetar.github.io/siggraph-maps/?palms.yaml/
