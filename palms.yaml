@@ -16,6 +16,10 @@ lights:
         diffuse: .5
         ambient: [0.643, 0.643, 0.643]
 
+scene:
+    background:
+        color: '#e0e1c8'
+
 styles:
     flatlines:
         base: lines
