@@ -56,7 +56,7 @@ styles:
                     float fps = .05;
                     float t = u_time * fps;
                     float t2 = u_time * fps +.66;
-                    vec3 pos = floor(v_world_position.xyz/pixelSize);
+                    vec3 pos = floor(worldPosition().xyz/pixelSize);
                     vec3 sparkles = vec3(0.);
                     sparkles = vec3(cnoise(pos+t))*2.;
                     sparkles += vec3(cnoise(pos+t2))*2.;
