@@ -64,7 +64,7 @@ layers:
         data: { source: osm, layer: earth }
         draw:
             triangles:
-                order: 0
+                order: function() { return feature.sort_key; }
                 color: [0.761, 0.886, 0.871]
 
     landuse:
@@ -72,19 +72,19 @@ layers:
         parks:
             draw:
                 landtriangles:
-                    order: 1
+                    order: function() { return feature.sort_key; }
                     color: [0.184, 0.455, 0.443]
         parking:
             filter: { kind: parking }
             draw:
                 polygons:
-                    order: 2
+                    order: function() { return feature.sort_key; }
                     color: [0.220, 0.212, 0.216]
     water:
         data: { source: osm, layer: water }
         draw:
             flatpolys:
-                order: 3
+                order: function() { return feature.sort_key; }
                 color: [0.671, 0.784, 0.949]
 
     roads:
@@ -92,7 +92,7 @@ layers:
         filter: { not: {kind: [rail, path] } }
         draw:
             flatlines:
-                order: 7
+                order: function() { return feature.sort_key; }
                 color: [0.337, 0.400, 0.373]
                 width: 10
         highway:
@@ -102,6 +102,7 @@ layers:
                     color: [0.408, 0.396, 1.000]
                     width: 20
                     outline:
+                        order: 352 # magic number
                         width: 3
                         color: [0.761, 0.886, 0.871]
             link:
@@ -115,19 +116,20 @@ layers:
                 flatlines:
                     color: [0.408, 0.396, 1.000]
                     outline:
+                        order: 352 # magic number
                         width: 1
                         color: [0.761, 0.886, 0.871]
         z-order:
             draw:
                 flatlines:
                     # let roads sort themselves
-                    order: function() { return 6 + feature.sort_key * 2.; }
+                    order: function() { return feature.sort_key; }
 
     buildings:
         data: { source: osm }
         draw:
             windows:
-                order: 80
+                order: function() { return feature.sort_key; }
                 color: [.4, .0, .4]
                 # randomize the heights of buildings a bit
                 extrude: function () { return feature.height || feature.area / 100 % 1 * 20 + 20; }

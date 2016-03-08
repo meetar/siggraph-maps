@@ -2,7 +2,7 @@ sources:
     osm:
         type: TopoJSON
         url:  //vector.mapzen.com/osm/all/{z}/{x}/{y}.topojson?api_key=vector-tiles-HqUVidw
-        
+
 camera:
     type: perspective
     vanishing_point: [0, -1000]
@@ -106,7 +106,7 @@ layers:
         data: { source: osm, layer: earth }
         draw:
             flatpolys:
-                order: 0
+                order: function() { return feature.sort_key; }
                 color: [0.882, 0.886, 0.788]
 
     landuse:
@@ -114,13 +114,13 @@ layers:
         parks:
             draw:
                 flatpolys:
-                    order: 1
+                    order: function() { return feature.sort_key; }
                     color: [0.5, 0.825, 0.5]
     water:
         data: { source: osm, layer: water }
         draw:
             flatpolys:
-                order: 3
+                order: function() { return feature.sort_key; }
                 color: [0.671, 0.784, 0.949]
 
     roads:
@@ -128,7 +128,7 @@ layers:
         filter: { not: {kind: [rail] } }
         draw:
             flatlines:
-                order: 7
+                order: function() { return feature.sort_key; }
                 color: [0.65882, 0.65882, 0.50196]
                 width: 10
         highway:
@@ -165,36 +165,37 @@ layers:
             draw:
                 flatlines:
                     # let roads sort themselves
-                    order: function() { return 6 + feature.sort_key * 2.; }
+                    order: function() { return feature.sort_key; }
             shadows:
                 draw:
                     lineshadow:
                         # one layer below the roads
-                        order: function() { return 5 + feature.sort_key * 2.; }
+                        order: function() { return feature.sort_key - 1; }
 
     # buildings are the only layer that gets lighting
     buildings:
         data: { source: osm }
         draw:
             windows:
-                order: 80
+                order: function() { return feature.sort_key; }
                 color: [0.941, 0.925, 0.769]
                 extrude: function () { return feature.height || feature.area / 100 % 1 * 20 + 20; }
         shadows:
             draw:
                 shadow:
-                    order: 80
+                    order: function() { return feature.sort_key; }
                     extrude: function () { return feature.height || feature.area / 100 % 1 + 10; }
     pois:
         data: { source: osm }
         filter:
             not:
-                kind: [tree, helipad]
+                kind: [tree, helipad, bank, parking, traffic signals, hotel, gate, restaurant, motorway_junction]
         draw:
             palms:
+                interactive: true
                 size: 32px
         shadow:
             draw:
                 palmshadows:
-                    order: 50
+                    order: 500
                     size: 32px

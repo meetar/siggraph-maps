@@ -57,16 +57,15 @@ styles:
                     // clamp to maximize sparkletude
                     float minInput = .95;
                     float maxInput = 1.;
-                    
+
                     sparkles = min(max(sparkles - vec3(minInput), vec3(0.0)) / (vec3(maxInput) - vec3(minInput)), vec3(1.0));
-                    
+
                     // brighten walls
                     sparkles += .25;
                     color.rgb *= sparkles * 2.;
                     // brighten roofs
                     if (v_normal.z > .9) color.rgb += sparkles * 5.;
-                    
-                    
+
     roads:
         base: lines
         lighting: false
@@ -77,13 +76,13 @@ styles:
                 color: |
                     vec2 st = v_texcoord.xy;
                     color.rgb *= vec3(sin(st.x*4.-.5)*.5, .5, .5);
-    
+
 layers:
     earth:
         data: { source: osm, layer: earth }
         draw:
             stars:
-                order: 0
+                order: function() { return feature.sort_key; }
                 color: [.25, 0, .25]
 
     landuse:
@@ -91,20 +90,20 @@ layers:
         parks:
             draw:
                 stars:
-                    order: 1
+                    order: function() { return feature.sort_key; }
                     color: [0, 0, .15]
     water:
         data: { source: osm, layer: water }
         draw:
             stars:
-                order: 3
+                order: function() { return feature.sort_key; }
                 color: [0.671, 0.784, 0.949]
 
     roads:
         data: { source: osm, layer: roads }
         draw:
             roads:
-                order: 7
+                order: function() { return feature.sort_key; }
                 color: [1.000, 0.5, 01.]
                 width: [[14, 80], [16, 30]]
                 cap: round
@@ -119,7 +118,6 @@ layers:
         data: { source: osm }
         draw:
             buildings:
-                order: 10
+                order: function() { return feature.sort_key; }
                 color: white
                 extrude: function () { return feature.height || feature.area / 100 % 1 * 20 + 20; }
-        
