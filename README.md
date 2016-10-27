@@ -1,3 +1,5 @@
+_This is an unmaintained repo providing legacy support._
+
 # siggraph-maps
 
 Three maps to [illustrate a Mapzen blog post](https://mapzen.com/blog/scenes-from-a-siggraph), interpreting a very short week in downtown Los Angeles.
