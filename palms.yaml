@@ -77,7 +77,7 @@ styles:
                 color: |
                     float number_of_frames = 4.;
                     float frames_per_second = 2.;
-                    // animate palms -- offset a bit by screen position
+                    // animate palms -- offset a bit by screen position to shift through the 4 sprites
                     float time = u_time + gl_FragCoord.x / 100.;
                     float offset = floor(mod(time * frames_per_second, number_of_frames))/number_of_frames;
                     color = texture2D(u_texture, (vec2(v_texcoord.x/number_of_frames, v_texcoord.y) + vec2(offset, 0.)));
@@ -90,7 +90,8 @@ styles:
         shaders:
             blocks:
                 # set alpha to texture alpha
-                color: color.a = texture2D(u_texture, v_texcoord).a;
+                # += for alpha blending
+                color: color.a += texture2D(u_texture, v_texcoord).a;
                 # bend tree shadow over
                 position: position.x += v_texcoord.y * 50.;
 
@@ -171,7 +172,7 @@ layers:
                 draw:
                     lineshadow:
                         # one layer below the roads
-                        order: function() { return feature.sort_key - 1 || 1; }
+                        order: function() { return feature.sort_rank - 1 || 1; }
 
     # buildings are the only layer that gets lighting
     buildings:
@@ -195,8 +196,10 @@ layers:
             palms:
                 interactive: true
                 size: 32px
+                # collide: false
         shadow:
             draw:
                 palmshadows:
                     order: 501
                     size: 32px
+                    collide: false
