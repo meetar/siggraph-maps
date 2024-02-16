@@ -1,7 +1,7 @@
 sources:
     osm:
         type: TopoJSON
-        url:  https://vector.mapzen.com/osm/all/{z}/{x}/{y}.topojson?api_key=vector-tiles-HqUVidw
+        url:  https://tile.nextzen.org/tilezen/vector/v1/256/all/{z}/{x}/{y}.topojson?api_key=d161Q8KATMOhSOcVGNyQ8g
         max_zoom: 16
 
 camera:
@@ -14,6 +14,9 @@ lights:
         direction: [1, 1, -.9]
         diffuse: .0
         ambient: 2.
+
+# import noise function from external file
+import: [noise.yaml]
 
 styles:
     flatlines:
@@ -36,10 +39,6 @@ styles:
                 texture: stars.jpg
                 mapping: spheremap
                 # scale: .0001
-
-    # import noise function from external file
-    noise:
-        url: noise.yaml
 
     buildings:
         base: polygons
@@ -84,7 +83,7 @@ layers:
         data: { source: osm, layer: earth }
         draw:
             stars:
-                order: function() { return feature.sort_key; }
+                order: function() { return feature.sort_rank; }
                 color: [.1, .1, .1]
 
     landuse:
@@ -92,20 +91,20 @@ layers:
         parks:
             draw:
                 stars:
-                    order: function() { return feature.sort_key; }
+                    order: function() { return feature.sort_rank; }
                     color: white
     water:
         data: { source: osm, layer: water }
         draw:
             stars:
-                order: function() { return feature.sort_key; }
+                order: function() { return feature.sort_rank; }
                 color: [0.671, 0.784, 0.949]
 
     roads:
         data: { source: osm, layer: roads }
         draw:
             roads:
-                order: function() { return feature.sort_key; }
+                order: function() { return feature.sort_rank; }
                 color: [1.000, 0.318, 0.737]
                 width: [[14, 80], [16, 30]]
                 cap: round
@@ -122,5 +121,5 @@ layers:
         data: { source: osm }
         draw:
             buildings:
-                order: function() { return feature.sort_key; }
+                order: function() { return feature.sort_rank; }
                 extrude: function () { return feature.height || feature.area / 100 % 1 * 20 + 20; }

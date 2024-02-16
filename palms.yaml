@@ -1,7 +1,7 @@
 sources:
     osm:
         type: TopoJSON
-        url:  https://vector.mapzen.com/osm/all/{z}/{x}/{y}.topojson?api_key=vector-tiles-HqUVidw
+        url:  https://tile.nextzen.org/tilezen/vector/v1/256/all/{z}/{x}/{y}.topojson?api_key=d161Q8KATMOhSOcVGNyQ8g
         max_zoom: 16
 
 camera:
@@ -107,7 +107,7 @@ layers:
         data: { source: osm, layer: earth }
         draw:
             flatpolys:
-                order: function() { return feature.sort_key; }
+                order: function() { return feature.sort_rank; }
                 color: [0.882, 0.886, 0.788]
 
     landuse:
@@ -115,13 +115,13 @@ layers:
         parks:
             draw:
                 flatpolys:
-                    order: function() { return feature.sort_key; }
+                    order: function() { return feature.sort_rank; }
                     color: [0.5, 0.825, 0.5]
     water:
         data: { source: osm, layer: water }
         draw:
             flatpolys:
-                order: function() { return feature.sort_key; }
+                order: function() { return feature.sort_rank; }
                 color: [0.671, 0.784, 0.949]
 
     roads:
@@ -129,7 +129,7 @@ layers:
         filter: { not: {kind: [rail] } }
         draw:
             flatlines:
-                order: function() { return feature.sort_key; }
+                order: function() { return feature.sort_rank; }
                 color: [0.65882, 0.65882, 0.50196]
                 width: 10
         highway:
@@ -166,25 +166,25 @@ layers:
             draw:
                 flatlines:
                     # let roads sort themselves
-                    order: function() { return feature.sort_key; }
+                    order: function() { return feature.sort_rank; }
             shadows:
                 draw:
                     lineshadow:
                         # one layer below the roads
-                        order: function() { return feature.sort_key - 1; }
+                        order: function() { return feature.sort_key - 1 || 1; }
 
     # buildings are the only layer that gets lighting
     buildings:
         data: { source: osm }
         draw:
             windows:
-                order: function() { return feature.sort_key; }
+                order: function() { return feature.sort_rank; }
                 color: [0.941, 0.925, 0.769]
                 extrude: function () { return feature.height || feature.area / 100 % 1 * 20 + 20; }
         shadows:
             draw:
                 shadow:
-                    order: function() { return feature.sort_key; }
+                    order: function() { return feature.sort_rank; }
                     extrude: function () { return feature.height || feature.area / 100 % 1 + 10; }
     pois:
         data: { source: osm }
@@ -198,5 +198,5 @@ layers:
         shadow:
             draw:
                 palmshadows:
-                    order: 500
+                    order: 501
                     size: 32px
